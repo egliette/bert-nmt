@@ -15,7 +15,7 @@ import fileinput
 import torch
 
 from fairseq import checkpoint_utils, options, tasks, utils
-from bert import BertTokenizer
+from transformers import AutoTokenizer
 
 Batch = namedtuple('Batch', 'ids src_tokens src_lengths bert_input')
 Translation = namedtuple('Translation', 'src_str hypos pos_scores alignments')
@@ -44,18 +44,15 @@ def make_batches(lines, args, task, max_positions, encode_fn):
         ).long()
         for src_str in lines
     ]
-    bertdict = BertTokenizer.from_pretrained(args.bert_model_name)
+    bertdict = AutoTokenizer.from_pretrained(args.bert_model_name)
     def getbert(line):
         line = line.strip()
-        line = '{} {} {}'.format('[CLS]', line, '[SEP]')
-        tokenizedline = bertdict.tokenize(line)
-        if len(tokenizedline) > bertdict.max_len:
-            tokenizedline = tokenizedline[:bertdict.max_len - 1]
-            tokenizedline.append('[SEP]')
-        words = bertdict.convert_tokens_to_ids(tokenizedline)
-        nwords = len(words)
+        input_ids = bertdict(line)['input_ids']
+        if len(input_ids) > bertdict.max_len:
+            input_ids = input_ids[:bertdict.model_max_length-1] + input_ids[-1]
+        nwords = len(input_ids)
         ids = torch.IntTensor(nwords)
-        for i, word in enumerate(words):
+        for i, word in enumerate(input_ids):
             ids[i] = word
         return ids.long()
     berttokens = [getbert(x) for x in bertlines]

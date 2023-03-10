@@ -7,11 +7,11 @@ fi
 set -x
 set -e
 export PYTHONIOENCODING="UTF-8"
-export TORCH_HOME=/code/bertnmt/checkpoints/bert
-cd /code/bertnmt
+export TORCH_HOME=/blob/v-jinhzh/code/bertnmt/checkpoints/bert
+cd /blob/v-jinhzh/code/bertnmt
 pip install --editable . --user --quiet
-MOSE=/code/mosesdecoder
-sockeye=/code/sockeye
+MOSE=/blob/v-jinhzh/code/mosesdecoder
+sockeye=/blob/v-jinhzh/code/sockeye
 
 cktpath=$1
 shift
@@ -43,7 +43,7 @@ esac
 done
 
 if [ $tgtlng == 'es' ]; then
-suffix="/data/iwslt/en_es/test.es"
+suffix="/blob/v-jinhzh/data/iwslt/en_es/test.es"
 elif [ $tgtlng == 'zh' ]; then
 suffix="-t iwslt17 -l ${srclng}-${tgtlng} --tok zh "
 else
@@ -51,8 +51,8 @@ suffix="-t iwslt17 -l ${srclng}-${tgtlng}"
 fi
 
 
-bpefile=/data/iwslt/${srclng}_${tgtlng}/test.$srclng
-dictpath=/data/iwslt/${srclng}_${tgtlng}/databin
+bpefile=/blob/v-jinhzh/data/iwslt/${srclng}_${tgtlng}/test.$srclng
+dictpath=/blob/v-jinhzh/data/iwslt/${srclng}_${tgtlng}/databin
 set -- "${POSITIONAL[@]}"
 tgtlog=$cktpath.log
 sed -r 's/(@@ )|(@@ ?$)//g' $bpefile > $bpefile.debpe

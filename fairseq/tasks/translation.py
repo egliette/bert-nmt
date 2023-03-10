@@ -7,7 +7,7 @@
 
 import itertools
 import os
-from bert import BertTokenizer
+from transformers import AutoTokenizer
 from fairseq import options, utils
 from fairseq.data import (
     ConcatDataset,
@@ -73,7 +73,7 @@ def load_langpair_dataset(
         src_dataset = ConcatDataset(src_datasets, sample_ratios)
         tgt_dataset = ConcatDataset(tgt_datasets, sample_ratios)
 
-    berttokenizer = BertTokenizer.from_pretrained(bert_model_name)
+    berttokenizer = AutoTokenizer.from_pretrained(bert_model_name)
     return LanguagePairDataset(
         src_dataset, src_dataset.sizes, src_dict,
         tgt_dataset, tgt_dataset.sizes, tgt_dict,

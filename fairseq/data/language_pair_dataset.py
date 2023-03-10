@@ -187,7 +187,8 @@ class LanguagePairDataset(FairseqDataset):
                   on the left if *left_pad_target* is ``True``.
         """
         return collate(
-            samples, pad_idx=self.src_dict.pad(), eos_idx=self.src_dict.eos(), bert_pad_idx=self.berttokenizer.pad(),
+            samples, pad_idx=self.src_dict.pad(), eos_idx=self.src_dict.eos(),
+            bert_pad_idx=self.berttokenizer.vocab[self.berttokenizer.special_tokens_map['pad_token']],
             left_pad_source=self.left_pad_source, left_pad_target=self.left_pad_target,
             input_feeding=self.input_feeding,
         )

@@ -26,11 +26,10 @@ from fairseq.modules import (
     PositionalEmbedding,
     SinusoidalPositionalEmbedding,
 )
-from bert import BertTokenizer
+from transformers import AutoTokenizer, AutoModel
 DEFAULT_MAX_SOURCE_POSITIONS = 1024
 DEFAULT_MAX_TARGET_POSITIONS = 1024
 
-from bert import BertModel
 
 @register_model('transformer')
 class TransformerModel(FairseqEncoderDecoderModel):
@@ -124,7 +123,7 @@ class TransformerModel(FairseqEncoderDecoderModel):
         if len(task.datasets) > 0:
             src_berttokenizer = next(iter(task.datasets.values())).berttokenizer
         else:
-            src_berttokenizer = BertTokenizer.from_pretrained(args.bert_model_name)
+            src_berttokenizer = AutoTokenizer.from_pretrained(args.bert_model_name)
 
         def build_embedding(dictionary, embed_dim, path=None):
             num_embeddings = len(dictionary)
@@ -157,7 +156,7 @@ class TransformerModel(FairseqEncoderDecoderModel):
             decoder_embed_tokens = build_embedding(
                 tgt_dict, args.decoder_embed_dim, args.decoder_embed_path
             )
-        bertencoder = BertModel.from_pretrained(args.bert_model_name)
+        bertencoder = AutoModel.from_pretrained(args.bert_model_name)
         args.bert_out_dim = bertencoder.hidden_size
         encoder = cls.build_encoder(args, src_dict, encoder_embed_tokens)
         decoder = cls.build_decoder(args, tgt_dict, decoder_embed_tokens)
@@ -264,7 +263,7 @@ class TransformerS2Model(FairseqEncoderDecoderModel):
         if len(task.datasets) > 0:
             src_berttokenizer = next(iter(task.datasets.values())).berttokenizer
         else:
-            src_berttokenizer = BertTokenizer.from_pretrained(args.bert_model_name)
+            src_berttokenizer = AutoTokenizer.from_pretrained(args.bert_model_name)
 
         def build_embedding(dictionary, embed_dim, path=None):
             num_embeddings = len(dictionary)
@@ -297,8 +296,8 @@ class TransformerS2Model(FairseqEncoderDecoderModel):
             decoder_embed_tokens = build_embedding(
                 tgt_dict, args.decoder_embed_dim, args.decoder_embed_path
             )
-        bertencoder = BertModel.from_pretrained(args.bert_model_name)
-        args.bert_out_dim = bertencoder.hidden_size
+        bertencoder = AutoModel.from_pretrained(args.bert_model_name)
+        args.bert_out_dim = bertencoder.config.hidden_size
         encoder = cls.build_encoder(args, src_dict, encoder_embed_tokens)
         decoder = cls.build_decoder(args, tgt_dict, decoder_embed_tokens)
 
@@ -335,9 +334,8 @@ class TransformerS2Model(FairseqEncoderDecoderModel):
                 - the decoder's output of shape `(batch, tgt_len, vocab)`
                 - a dictionary with any model-specific outputs
         """
-        bert_encoder_padding_mask = bert_input.eq(self.berttokenizer.pad())
-        bert_encoder_out, _ =  self.bert_encoder(bert_input, output_all_encoded_layers=True, attention_mask= 1. - bert_encoder_padding_mask)
-        bert_encoder_out = bert_encoder_out[self.bert_output_layer]
+        bert_encoder_padding_mask = bert_input.eq(self.berttokenizer.pad)
+        bert_encoder_out = self.bert_encoder(bert_input, attention_mask= ~bert_encoder_padding_mask)[0]
         if self.mask_cls_sep:
             bert_encoder_padding_mask += bert_input.eq(self.berttokenizer.cls())
             bert_encoder_padding_mask += bert_input.eq(self.berttokenizer.sep())

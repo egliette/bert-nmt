@@ -193,6 +193,7 @@ class FairseqEncoderDecoderModel(BaseFairseqModel):
         self.decoder = decoder
         self.bert_encoder = bertencoder
         self.berttokenizer = berttokenizer
+        self.berttokenizer.pad = self.berttokenizer.vocab[self.berttokenizer.special_tokens_map['pad_token']]
         self.mask_cls_sep = mask_cls_sep
         self.bert_output_layer = getattr(args, 'bert_output_layer', -1)
         # outdim = self.encoder.layers[0].embed_dim
